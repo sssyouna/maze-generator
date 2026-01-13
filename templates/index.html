@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maze Generator</title>
+</head>
+<body>
+    <div id="inputs">
+        <h1>Give the maze dimensions</h1>
+        <label>Width: <input type="number" id="w" required></label>
+        <label>Height: <input type="number" id="h" required></label>
+        <button id="generatebtn">Generate</button>
+    </div>
+
+    <pre id="pr"></pre> 
+
+    <script>
+        async function sendData(x, y) {
+            try {
+                const response = await fetch('/generate', {  
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ width: x, height: y })
+                });
+                const data = await response.json();
+                document.getElementById("pr").textContent = data.maze;
+            } catch (error) {
+                console.error("Error posting to route:", error);
+            }
+        }
+
+        document.getElementById("generatebtn").addEventListener("click", () => {
+            const w = parseInt(document.getElementById("w").value);
+            const h = parseInt(document.getElementById("h").value);
+            sendData(w, h);
+        });
+    </script>
+</body>
+</html>
