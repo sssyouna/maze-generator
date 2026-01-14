@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maze Runner Game</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Maze Runner Game</h1>
+            <div class="stats-container">
+                <div class="stat-box">
+                    <span class="stat-label">Time:</span>
+                    <span id="timer" class="stat-value">00:00</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Moves:</span>
+                    <span id="move-count" class="stat-value">0</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Score:</span>
+                    <span id="score" class="stat-value">0</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="controls">
+            <div class="input-group">
+                <label for="w">Width:</label>
+                <input type="number" id="w" min="2" max="30" value="16" required>
+            </div>
+            <div class="input-group">
+                <label for="h">Height:</label>
+                <input type="number" id="h" min="2" max="50" value="8" required>
+            </div>
+            <button id="generatebtn" class="btn btn-primary">Generate Maze</button>
+            <button id="startbtn" class="btn btn-secondary">Start Playing</button>
+            <button id="restartbtn" class="btn btn-warning">Restart</button>
+            <button id="show-solutionbtn" class="btn btn-accent">Show Solution</button>
+        </div>
+
+        <div class="game-area">
+            <table id="maze-table" class="maze-grid"></table>
+        </div>
+
+        <div class="instructions">
+            <p>Use arrow keys to move the player. Reach the red start point from the green end point!</p>
+        </div>
+
+        <div id="win-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2>Congratulations!</h2>
+                <p>You completed the maze!</p>
+                <div class="win-stats">
+                    <p>Final Time: <span id="final-time">00:00</span></p>
+                    <p>Total Moves: <span id="final-moves">0</span></p>
+                    <p>Final Score: <span id="final-score">0</span></p>
+                </div>
+                <button id="close-modal" class="btn btn-primary">Play Again</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

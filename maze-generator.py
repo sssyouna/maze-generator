@@ -1,5 +1,5 @@
 from random import shuffle
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, send_file
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -46,7 +46,11 @@ def make_maze(w=16, h=8):
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return send_file('index.html')
+
+@app.route('/<path:filename>')
+def static_files(filename):
+    return send_file(filename)
 
 # Input validation helper functions
 def clamp(value, min_val, max_val):
@@ -55,7 +59,7 @@ def clamp(value, min_val, max_val):
 @app.route('/generate', methods=['POST'])
 def generate():
     data = request.get_json()
-    w = clamp(int(data.get('width', 16)), 2, 50)
+    w = clamp(int(data.get('width', 16)), 2, 30)
     h = clamp(int(data.get('height', 8)), 2, 50)
     maze_data = make_maze(w, h)
     return jsonify(maze_data)

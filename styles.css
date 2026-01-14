@@ -1,0 +1,312 @@
+/* Reset and base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background: #f0f0f0;
+    color: #333;
+    min-height: 100vh;
+    padding: 10px;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 10px;
+}
+
+/* Header styles */
+header {
+    text-align: center;
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #e0e0e0;
+    border-radius: 8px;
+}
+
+h1 {
+    font-size: 1.8rem;
+    margin-bottom: 15px;
+    color: #2c3e50;
+}
+
+/* Stats container */
+.stats-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.stat-box {
+    background: #d0d0d0;
+    padding: 10px 15px;
+    border-radius: 5px;
+    text-align: center;
+    min-width: 100px;
+}
+
+.stat-label {
+    display: block;
+    font-size: 0.8rem;
+    color: #555;
+    margin-bottom: 3px;
+}
+
+.stat-value {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+/* Controls section */
+.controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    padding: 15px;
+    background: #e8e8e8;
+    border-radius: 8px;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+}
+
+.input-group label {
+    font-size: 0.9rem;
+    color: #444;
+}
+
+.input-group input {
+    padding: 8px 10px;
+    border: 1px solid #999;
+    border-radius: 4px;
+    background: white;
+    color: #333;
+    font-size: 0.9rem;
+    width: 80px;
+    text-align: center;
+}
+
+.input-group input:focus {
+    outline: none;
+    border-color: #3498db;
+}
+
+/* Buttons */
+.btn {
+    padding: 10px 20px;
+    border: 1px solid #666;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    cursor: pointer;
+    background: #bdc3c7;
+    color: white;
+    transition: background 0.2s;
+}
+
+.btn-primary {
+    background: #3498db;
+}
+
+.btn-primary:hover {
+    background: #2980b9;
+}
+
+.btn-secondary {
+    background: #2ecc71;
+}
+
+.btn-secondary:hover {
+    background: #27ae60;
+}
+
+.btn-accent {
+    background: #e67e22;
+}
+
+.btn-accent:hover {
+    background: #d35400;
+}
+
+.btn-warning {
+    background: #f39c12;
+}
+
+.btn-warning:hover {
+    background: #e67e00;
+}
+
+/* Game area */
+.game-area {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+    padding: 15px;
+    background: #e8e8e8;
+    border-radius: 8px;
+    min-height: 400px;
+    align-items: center;
+}
+
+/* Maze grid styles */
+.maze-grid {
+    border-collapse: collapse;
+    border: 3px solid #333;
+    background: #fff;
+}
+
+.maze-grid td {
+    margin: 0 !important;
+    padding: 0 !important;
+    transition: all 0.2s ease;
+    background: #fff;
+}
+
+/* Special cells - Start (red) and End (green) */
+.start-cell {
+    background: #ffcdd2 !important;
+    border: 1px solid #e57373 !important;
+}
+
+.end-cell {
+    background: #c8e6c9 !important;
+    border: 1px solid #81c784 !important;
+}
+
+/* Player character - distinct and visible */
+.player-cell {
+    background: #fff9c4 !important;
+    border: 1px solid #fbc02d !important;
+}
+
+/* Solution path */
+.solution {
+    background: #fff176 !important;
+}
+
+.instructions {
+    text-align: center;
+    margin: 20px 0;
+    padding: 10px;
+    background: #e0e0e0;
+    border-radius: 5px;
+}
+
+.instructions p {
+    font-size: 1rem;
+    color: #444;
+}
+
+/* Modal styles */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal.hidden {
+    display: none;
+}
+
+.modal-content {
+    background: white;
+    padding: 25px;
+    border-radius: 8px;
+    text-align: center;
+    max-width: 400px;
+    width: 90%;
+    border: 2px solid #333;
+}
+
+.modal-content h2 {
+    font-size: 1.8rem;
+    margin-bottom: 15px;
+    color: #2c3e50;
+}
+
+.modal-content p {
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.win-stats {
+    margin: 20px 0;
+    padding: 15px;
+    background: #f0f0f0;
+    border-radius: 5px;
+}
+
+.win-stats p {
+    margin: 8px 0;
+    font-size: 1rem;
+}
+
+.win-stats span {
+    font-weight: bold;
+    color: #e67e22;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+    
+    h1 {
+        font-size: 1.5rem;
+    }
+    
+    .controls {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .stats-container {
+        gap: 15px;
+    }
+    
+    .stat-box {
+        min-width: 90px;
+        padding: 8px 12px;
+    }
+    
+    .btn {
+        padding: 8px 16px;
+        font-size: 0.85rem;
+    }
+    
+    .game-area {
+        padding: 10px;
+        min-height: 350px;
+    }
+    
+    .modal-content {
+        padding: 20px;
+        margin: 20px;
+    }
+    
+    .modal-content h2 {
+        font-size: 1.5rem;
+    }
+}
