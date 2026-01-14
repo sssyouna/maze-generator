@@ -97,9 +97,9 @@ function drawMaze(data) {
                 ? "2px solid black"
                 : "none";
 
-            // Entrance / Exit
-            if (x === 0 && y === 0) td.style.background = "lightgreen";
-            if (x === w - 1 && y === h - 1) td.style.background = "lightcoral";
+            // Entrance / Exit (colors swapped)
+            if (x === 0 && y === 0) td.style.background = "lightcoral";  // Start point (now red)
+            if (x === w - 1 && y === h - 1) td.style.background = "lightgreen";  // End point (now green)
 
             tr.appendChild(td);
         }
@@ -199,7 +199,7 @@ function drawMaze(data) {
          for (let x = 0; x < cells.length; x++) {
              // Reset to default (might have been highlighted before)
              if (!(x === 0 && y === 0) && !(x === currentMazeData.w - 1 && y === currentMazeData.h - 1)) {
-                 if (cells[x].style.background !== "lightgreen" && cells[x].style.background !== "lightcoral") {
+                 if (cells[x].style.background !== "lightcoral" && cells[x].style.background !== "lightgreen") {
                      cells[x].style.background = "";
                  }
              }
