@@ -21,11 +21,9 @@
             margin-top: 20px;
         }
 
-        #pr {
-            display: flex;
-            flex-direction: column; /* stack rows */
-            align-items: center;    /* center each row horizontally */
+        #maze-table {
             margin-top: 10px;
+            border-collapse: collapse;
         }
     </style>
 </head>
@@ -37,7 +35,7 @@
         <button id="generatebtn">Generate</button>
     </div>
 
-    <div id="pr"></div>
+    <table id="maze-table" style="border-collapse: collapse; border: 2px solid black;"></table>
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
@@ -64,110 +62,48 @@
             });
         });
 
-        function drawMaze(maze) {
-            const container = document.getElementById("pr");
-            container.innerHTML = ""; // Clear previous maze
+        function drawMaze(mazeArray) {
+            const table = document.getElementById("maze-table");
+            table.innerHTML = ""; // Clear previous maze
             
-            // Set container styles to remove any spacing
-            container.style.display = "flex";
-            container.style.flexDirection = "column";
-            container.style.alignItems = "center";
-            container.style.gap = "0";
+            if (!mazeArray || mazeArray.length === 0) return;
             
-            // Create a canvas-like element for precise drawing
-            const canvasContainer = document.createElement("div");
-            canvasContainer.style.position = "relative";
-            canvasContainer.style.border = "2px solid black";
+            const numRows = mazeArray.length;
+            const numCols = mazeArray[0] ? mazeArray[0].length : 0;
             
-            // Parse maze dimensions
-            const lines = maze.split("\n").filter(line => line.trim());
-            if (lines.length === 0) return;
-            
-            // Calculate actual dimensions based on the maze structure
-            const cellSize = 20; // Size of each cell in pixels
-            const numLines = lines.length;
-            const numCols = lines[0] ? lines[0].split(" ").length : 0;
-            
-            // The maze algorithm generates alternating horizontal and vertical lines
-            // For a maze of height h and width w, we have (h+1) horizontal lines and h vertical lines
-            // So total lines = (h+1) + h = 2h+1
-            // The resulting maze has h rows of cells and w columns of cells
-            const mazeGridHeight = (numLines - 1) / 2; // Since numLines = 2h+1, then h = (numLines-1)/2
-            const actualRows = mazeGridHeight; // Number of cell rows
-            const actualCols = numCols; // Number of cell columns
-            
-            canvasContainer.style.width = (actualCols * cellSize) + "px";
-            canvasContainer.style.height = (actualRows * cellSize) + "px";
-            
-            // Process each line
-            lines.forEach((line, lineIndex) => {
-                const cellCodes = line.split(" ");
+            // Create table rows and cells
+            for (let i = 0; i < numRows; i++) {
+                const row = document.createElement("tr");
                 
-                cellCodes.forEach((cellCode, colIndex) => {
-                    if (!cellCode) return;
+                for (let j = 0; j < numCols; j++) {
+                    const cell = document.createElement("td");
                     
-                    const cell = document.createElement("div");
-                    cell.style.position = "absolute";
+                    // Set unique ID for each cell
+                    cell.id = `cell-${i}-${j}`;
                     
-                    // The maze is drawn with boundaries between cells
-                    // Even-indexed lines (0,2,4...) are horizontal boundaries
-                    // Odd-indexed lines (1,3,5...) are vertical boundaries
-                    if (lineIndex % 2 === 0) {
-                        // Horizontal boundary (top edge of a cell row)
-                        // lineIndex = 0 -> top of row 0
-                        // lineIndex = 2 -> top of row 1
-                        // lineIndex = 2k -> top of row k
-                        const row = lineIndex / 2; // Which row this horizontal line belongs to
-                        const x = colIndex * cellSize;
-                        const y = row * cellSize;
-                        
-                        cell.style.left = x + "px";
-                        cell.style.top = y + "px";
-                        cell.style.width = cellSize + "px";
-                        cell.style.height = "4px"; // Thin horizontal line
-                        cell.style.marginLeft = "0";
-                        cell.style.marginRight = "0";
-                        
-                        // Set background based on cell code
-                        if (cellCode === "h") {
-                            cell.style.backgroundColor = "black"; // Wall
-                        } else if (cellCode === "h0") {
-                            cell.style.backgroundColor = "white"; // Path
-                        } else if (cellCode === "S") {
-                            cell.style.backgroundColor = "green"; // Start (appears in first horizontal line)
-                        } else if (cellCode === "E") {
-                            cell.style.backgroundColor = "red"; // End (appears in last horizontal line)
-                        }
+                    // Set default styles
+                    cell.style.width = "20px";
+                    cell.style.height = "20px";
+                    cell.style.padding = "0";
+                    cell.style.margin = "0";
+                    cell.style.border = "1px solid #eee"; // Light border to separate cells
+                    
+                    // Show/hide based on the value in the 2D array
+                    if (mazeArray[i][j] === 1) {
+                        // Wall - make it visible
+                        cell.style.backgroundColor = "black";
+                        cell.style.visibility = "visible";
                     } else {
-                        // Vertical boundary (left edge of a cell column)
-                        // lineIndex = 1 -> left of row 0
-                        // lineIndex = 3 -> left of row 1
-                        // lineIndex = 2k+1 -> left of row k
-                        const row = (lineIndex - 1) / 2; // Which row this vertical line belongs to
-                        const x = colIndex * cellSize;
-                        const y = row * cellSize;
-                        
-                        cell.style.left = x + "px";
-                        cell.style.top = y + "px";
-                        cell.style.width = "4px"; // Thin vertical line
-                        cell.style.height = cellSize + "px";
-                        cell.style.marginTop = "0";
-                        cell.style.marginBottom = "0";
-                        
-                        // Set background based on cell code
-                        if (cellCode === "v") {
-                            cell.style.backgroundColor = "black"; // Wall
-                        } else if (cellCode === "v0") {
-                            cell.style.backgroundColor = "white"; // Path
-                        }
+                        // Path - make it white
+                        cell.style.backgroundColor = "white";
+                        cell.style.visibility = "visible"; // Still visible but with different color
                     }
                     
-                    cell.style.boxSizing = "border-box";
-                    canvasContainer.appendChild(cell);
-                });
-            });
-            
-            container.appendChild(canvasContainer);
+                    row.appendChild(cell);
+                }
+                
+                table.appendChild(row);
+            }
         }
     </script>
 </body>

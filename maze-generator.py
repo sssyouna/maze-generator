@@ -5,8 +5,8 @@ app = Flask(__name__)
 
 def make_maze(w=16, h=8):
     vis = [[0]*w + [1] for _ in range(h)] + [[1]*(w+1)]
-    ver = [["v"]*w for _ in range(h)]
-    hor = [["h"]*w for _ in range(h+1)]
+    ver = [[1]*w for _ in range(h)]
+    hor = [[1]*w for _ in range(h+1)]
 
     def walk(x, y):
         vis[y][x] = 1
@@ -16,23 +16,30 @@ def make_maze(w=16, h=8):
             if vis[yy][xx]:
                 continue
             if xx == x:
-                hor[max(y,yy)][x] = "h0"  # open horizontal
+                hor[max(y,yy)][x] = 0  # open horizontal
             if yy == y:
-                ver[y][max(x,xx)] = "v0"  # open vertical
+                ver[y][max(x,xx)] = 0  # open vertical
             walk(xx, yy)
 
     walk(0, 0)
 
     # Entrance & exit
-    hor[0][0] = "S"
-    hor[h][w-1] = "E"
+    hor[0][0] = 0  # entrance
+    hor[h][w-1] = 0  # exit
 
-    # Build string with space delimiter
-    s = ""
-    for a, b in zip(hor, ver):
-        s += ' '.join(a) + '\n'
-        s += ' '.join(b) + '\n'
-    return s
+    # Build 2D array representation
+    maze_array = []
+    for i in range(len(hor)):
+        if i < len(ver):
+            # Add horizontal row
+            maze_array.append(hor[i][:])
+            # Add vertical row
+            maze_array.append(ver[i][:])
+        else:
+            # Add the last horizontal row
+            maze_array.append(hor[i][:])
+    
+    return maze_array
 
 @app.route('/')
 def index():
@@ -43,7 +50,8 @@ def generate():
     data = request.get_json()
     w = int(data.get('width', 16))
     h = int(data.get('height', 8))
-    return jsonify({"maze": make_maze(w, h)})
+    maze_array = make_maze(w, h)
+    return jsonify({"maze": maze_array})
 
 if __name__ == '__main__':
     app.run(debug=True)
