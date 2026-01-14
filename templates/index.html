@@ -87,15 +87,12 @@ function drawMaze(data) {
                 : "none";
 
             // LEFT
-            td.style.borderLeft =
-                x === 0
-                    ? "2px solid black"
-                    : ver[y][x - 1]
-                        ? "2px solid black"
-                        : "none";
+            td.style.borderLeft = ver[y][x]
+                ? "2px solid black"
+                : "none";
 
             // RIGHT
-            td.style.borderRight = ver[y][x]
+            td.style.borderRight = ver[y][x + 1]
                 ? "2px solid black"
                 : "none";
 
