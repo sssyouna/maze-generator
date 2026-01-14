@@ -28,11 +28,11 @@ def make_maze(w=16, h=8):
     # Start DFS from top-left corner (0, 0)
     walk(0, 0)
 
-    # Ensure entrance at top-left (remove leftmost top wall)
-    hor[0][0] = 0  # entrance at top-left
+    # Entrance: remove LEFT wall of start cell
+    ver[0][0] = 0  # entrance at top-left
     
-    # Ensure exit at bottom-right (remove rightmost bottom wall)
-    hor[h][w-1] = 0  # exit at bottom-right
+    # Exit: remove RIGHT wall of goal cell
+    ver[h-1][w-1] = 0  # exit at bottom-right
 
     # Return the walls separately with dimensions
     return {
@@ -51,8 +51,8 @@ def generate():
     data = request.get_json()
     w = int(data.get('width', 16))
     h = int(data.get('height', 8))
-    maze_array = make_maze(w, h)
-    return jsonify({"maze": maze_array})
+    maze_data = make_maze(w, h)
+    return jsonify(maze_data)
 
 if __name__ == '__main__':
     app.run(debug=True)

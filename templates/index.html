@@ -58,7 +58,7 @@
                     })
                 })
                 .then(res => res.json())
-                .then(responseData => drawMaze(responseData.maze))
+                .then(data => drawMaze(data))
                 .catch(err => console.error(err));
             });
         });
@@ -76,15 +76,31 @@ function drawMaze(data) {
             td.style.height = "25px";
             td.style.boxSizing = "border-box";
 
-            // walls
-            td.style.borderTop = hor[y][x] ? "2px solid black" : "none";
-            td.style.borderBottom = hor[y + 1][x] ? "2px solid black" : "none";
-            td.style.borderLeft = x === 0 || ver[y][x - 1] ? "2px solid black" : "none";
-            td.style.borderRight = ver[y][x] ? "2px solid black" : "none";
+            // TOP
+            td.style.borderTop = hor[y][x]
+                ? "2px solid black"
+                : "none";
 
-            // entrance
+            // BOTTOM
+            td.style.borderBottom = hor[y + 1][x]
+                ? "2px solid black"
+                : "none";
+
+            // LEFT
+            td.style.borderLeft =
+                x === 0
+                    ? "2px solid black"
+                    : ver[y][x - 1]
+                        ? "2px solid black"
+                        : "none";
+
+            // RIGHT
+            td.style.borderRight = ver[y][x]
+                ? "2px solid black"
+                : "none";
+
+            // Entrance / Exit
             if (x === 0 && y === 0) td.style.background = "lightgreen";
-            // exit
             if (x === w - 1 && y === h - 1) td.style.background = "lightcoral";
 
             tr.appendChild(td);
