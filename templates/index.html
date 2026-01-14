@@ -94,12 +94,12 @@
                 // If no maze exists, generate a default one
                 const width = Math.max(2, Math.min(50, parseInt(document.getElementById("w").value)));
                 const height = Math.max(2, Math.min(50, parseInt(document.getElementById("h").value)));
-                        
+                            
                 if (!width || !height) {
                     alert("Please enter both width and height");
                     return;
                 }
-                        
+                            
                 fetch("/generate", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -243,7 +243,7 @@
         }
         
         // Function to update player position visualization
-        function updatePlayerPosition() {
+        function updatePlayerPosition(prevX = -1, prevY = -1) {
             if (!currentMazeData || !currentPlayerPos) return;
             
             const { w, h } = currentMazeData;
@@ -252,7 +252,23 @@
             // Validate position is within bounds
             if (x < 0 || x >= w || y < 0 || y >= h) return;
             
-            // Get the cell element
+            // Clear previous player position if provided
+            if (prevX !== -1 && prevY !== -1) {
+                const prevCell = document.getElementById(`cell-${prevY}-${prevX}`);
+                if (prevCell) {
+                    // Only clear if the previous cell is not the start or end point
+                    if (prevX === 0 && prevY === 0) {
+                        prevCell.style.background = "lightcoral"; // Start point stays red
+                    } else if (prevX === w - 1 && prevY === h - 1) {
+                        prevCell.style.background = "lightgreen"; // End point stays green
+                    } else {
+                        // Clear the background if it's just a regular path cell
+                        prevCell.style.background = "";
+                    }
+                }
+            }
+            
+            // Get the current cell element
             const cell = document.getElementById(`cell-${y}-${x}`);
             if (cell) {
                 // Add player indicator (different from start/end)
@@ -306,15 +322,20 @@
             }
             
             if (moved) {
+                // Track previous position
+                const prevX = currentPlayerPos.x;
+                const prevY = currentPlayerPos.y;
+                
                 // Update player position
                 currentPlayerPos = { x, y };
                 
-                // Update visualization
-                updatePlayerPosition();
+                // Update visualization with previous position
+                updatePlayerPosition(prevX, prevY);
                 
                 // Check if player reached start point (win condition)
                 if (x === 0 && y === 0) {
                     setTimeout(() => {
+                        findAndDrawSolution(currentMazeData);
                         alert('Congratulations! You reached the start point!');
                     }, 100);
                 }
