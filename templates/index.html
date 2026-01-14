@@ -26,6 +26,10 @@
             border-collapse: collapse;
             border: 2px solid black;
         }
+        
+        .solution {
+            background-color: rgba(255, 0, 0, 0.5);
+        }
     </style>
 </head>
 <body>
@@ -41,9 +45,13 @@
     <table id="maze-table" style="border-collapse: collapse; border: 2px solid black;"></table>
 
     <script>
+        // Global variable for storing maze data
+        let currentMazeData = null;
+        
+        // Add event listeners once at the top level
         document.getElementById("generatebtn").addEventListener("click", function() {
-                const width = document.getElementById("w").value;
-                const height = document.getElementById("h").value;
+                const width = Math.max(2, Math.min(50, parseInt(document.getElementById("w").value)));
+                const height = Math.max(2, Math.min(50, parseInt(document.getElementById("h").value)));
 
                 if (!width || !height) {
                     alert("Please enter both width and height");
@@ -54,216 +62,173 @@
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({
-                        width: parseInt(width),
-                        height: parseInt(height)
+                        width: width,
+                        height: height
                     })
                 })
                 .then(res => res.json())
-                .then(data => drawMaze(data))
+                .then(data => {
+                    currentMazeData = data; // Store for solution
+                    drawMaze(data);
+                })
                 .catch(err => console.error(err));
             });
+            
+        document.getElementById("show-solutionbtn").addEventListener("click", function() {
+            if (currentMazeData) {
+                findAndDrawSolution(currentMazeData);
+            }
+        });
         
-function drawMaze(data) {
-    const { hor, ver, w, h } = data;
-    const table = document.getElementById("maze-table");
-    table.innerHTML = "";
-
-    for (let y = 0; y < h; y++) {
-        const tr = document.createElement("tr");
-
-        for (let x = 0; x < w; x++) {
-            const td = document.createElement("td");
-            td.style.width = "25px";
-            td.style.height = "25px";
-            td.style.boxSizing = "border-box";
-
-            // TOP
-            td.style.borderTop = hor[y][x]
-                ? "2px solid black"
-                : "none";
-
-            // BOTTOM
-            td.style.borderBottom = hor[y + 1][x]
-                ? "2px solid black"
-                : "none";
-
-            // LEFT
-            td.style.borderLeft = ver[y][x]
-                ? "2px solid black"
-                : "none";
-
-            // RIGHT
-            td.style.borderRight = ver[y][x + 1]
-                ? "2px solid black"
-                : "none";
-
-            // Entrance / Exit (colors swapped)
-            if (x === 0 && y === 0) td.style.background = "lightcoral";  // Start point (now red)
-            if (x === w - 1 && y === h - 1) td.style.background = "lightgreen";  // End point (now green)
-
-            tr.appendChild(td);
+        document.getElementById("startbtn").addEventListener("click", function() {
+            // Reset the maze display when starting to play
+            const width = Math.max(2, Math.min(50, parseInt(document.getElementById("w").value)));
+            const height = Math.max(2, Math.min(50, parseInt(document.getElementById("h").value)));
+            
+            if (!width || !height) {
+                alert("Please enter both width and height");
+                return;
+            }
+            
+            fetch("/generate", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    width: width,
+                    height: height
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                currentMazeData = data; // Store for solution
+                drawMaze(data);
+            })
+            .catch(err => console.error(err));
+        });
+        
+        // Single drawMaze function that only draws the maze
+        function drawMaze(data) {
+            const { hor, ver, w, h } = data;
+            const table = document.getElementById("maze-table");
+            table.innerHTML = "";
+        
+            for (let y = 0; y < h; y++) {
+                const tr = document.createElement("tr");
+        
+                for (let x = 0; x < w; x++) {
+                    const td = document.createElement("td");
+                    td.id = `cell-${y}-${x}`; // Add unique ID to each cell
+                    td.style.width = "25px";
+                    td.style.height = "25px";
+                    td.style.boxSizing = "border-box";
+        
+                    // TOP
+                    td.style.borderTop = hor[y][x]
+                        ? "2px solid black"
+                        : "none";
+        
+                    // BOTTOM
+                    td.style.borderBottom = hor[y + 1][x]
+                        ? "2px solid black"
+                        : "none";
+        
+                    // LEFT
+                    td.style.borderLeft = ver[y][x]
+                        ? "2px solid black"
+                        : "none";
+        
+                    // RIGHT
+                    td.style.borderRight = ver[y][x + 1]
+                        ? "2px solid black"
+                        : "none";
+        
+                    // Entrance / Exit (consistent colors: start=green, end=red)
+                    if (x === 0 && y === 0) td.style.background = "lightgreen";  // Start point (green)
+                    if (x === w - 1 && y === h - 1) td.style.background = "lightcoral";  // End point (red)
+        
+                    tr.appendChild(td);
+                }
+                table.appendChild(tr);
+            }
         }
-        table.appendChild(tr);
-    }
-     // Store maze data globally so solution can access it
-     let currentMazeData = null;
-     
-     document.getElementById("show-solutionbtn").addEventListener("click", function() {
-         if (currentMazeData) {
-             findAndDrawSolution(currentMazeData);
-         }
-     });
-     
-     document.getElementById("startbtn").addEventListener("click", function() {
-         // Reset the maze display when starting to play
-         const width = document.getElementById("w").value;
-         const height = document.getElementById("h").value;
-         
-         if (!width || !height) {
-             alert("Please enter both width and height");
-             return;
-         }
-         
-         fetch("/generate", {
-             method: "POST",
-             headers: { "Content-Type": "application/json" },
-             body: JSON.stringify({
-                 width: parseInt(width),
-                 height: parseInt(height)
-             })
-         })
-         .then(res => res.json())
-         .then(data => {
-             currentMazeData = data; // Store for solution
-             drawMaze(data);
-         })
-         .catch(err => console.error(err));
-     });
- }
- 
- // Function to find and draw solution path
- function findAndDrawSolution(mazeData) {
-     const { hor, ver, w, h } = mazeData;
-     
-     // BFS to find solution path from start (0,0) to end (w-1, h-1)
-     const queue = [{x: 0, y: 0, path: [{x: 0, y: 0}]}];
-     const visited = Array(h).fill().map(() => Array(w).fill(false));
-     visited[0][0] = true;
-     
-     while (queue.length > 0) {
-         const {x, y, path} = queue.shift();
-         
-         if (x === w - 1 && y === h - 1) {
-             // Found solution path
-             drawSolutionPath(path);
-             return;
-         }
-         
-         // Check all 4 directions
-         // Up: check if there's no top wall for current cell
-         if (y > 0 && !hor[y][x] && !visited[y-1][x]) {
-             visited[y-1][x] = true;
-             queue.push({x: x, y: y-1, path: [...path, {x: x, y: y-1}] });
-         }
-         
-         // Down: check if there's no bottom wall for current cell
-         if (y < h-1 && !hor[y+1][x] && !visited[y+1][x]) {
-             visited[y+1][x] = true;
-             queue.push({x: x, y: y+1, path: [...path, {x: x, y: y+1}] });
-         }
-         
-         // Left: check if there's no left wall for current cell
-         if (x > 0 && !ver[y][x] && !visited[y][x-1]) {
-             visited[y][x-1] = true;
-             queue.push({x: x-1, y: y, path: [...path, {x: x-1, y: y}] });
-         }
-         
-         // Right: check if there's no right wall for current cell
-         if (x < w-1 && !ver[y][x+1] && !visited[y][x+1]) {
-             visited[y][x+1] = true;
-             queue.push({x: x+1, y: y, path: [...path, {x: x+1, y: y}] });
-         }
-     }
-     
-     console.log("No solution found");
- }
- 
- // Function to draw the solution path
- function drawSolutionPath(path) {
-     // Reset all cell backgrounds first
-     const table = document.getElementById("maze-table");
-     const rows = table.querySelectorAll("tr");
-     
-     for (let y = 0; y < rows.length; y++) {
-         const cells = rows[y].querySelectorAll("td");
-         for (let x = 0; x < cells.length; x++) {
-             // Reset to default (might have been highlighted before)
-             if (!(x === 0 && y === 0) && !(x === currentMazeData.w - 1 && y === currentMazeData.h - 1)) {
-                 if (cells[x].style.background !== "lightcoral" && cells[x].style.background !== "lightgreen") {
-                     cells[x].style.background = "";
-                 }
-             }
-         }
-     }
-     
-     // Highlight the solution path in red
-     for (const pos of path) {
-         const cell = document.querySelector(`#cell-${pos.y}-${pos.x}`) || 
-                   document.querySelector(`td:nth-child(${pos.x + 1})`, rows[pos.y]);
-         if (cell) {
-             // Don't override entrance/exit colors
-             if (!(pos.x === 0 && pos.y === 0) && !(pos.x === currentMazeData.w - 1 && pos.y === currentMazeData.h - 1)) {
-                 cell.style.background = "linear-gradient(rgba(255, 0, 0, 0.5), rgba(255, 0, 0, 0.5))";
-             }
-         }
-     }
- }
- 
- // Add unique IDs to cells in drawMaze function
- function drawMaze(data) {
-     const { hor, ver, w, h } = data;
-     const table = document.getElementById("maze-table");
-     table.innerHTML = "";
- 
-     for (let y = 0; y < h; y++) {
-         const tr = document.createElement("tr");
- 
-         for (let x = 0; x < w; x++) {
-             const td = document.createElement("td");
-             td.id = `cell-${y}-${x}`; // Add unique ID to each cell
-             td.style.width = "25px";
-             td.style.height = "25px";
-             td.style.boxSizing = "border-box";
- 
-             // TOP
-             td.style.borderTop = hor[y][x]
-                 ? "2px solid black"
-                 : "none";
- 
-             // BOTTOM
-             td.style.borderBottom = hor[y + 1][x]
-                 ? "2px solid black"
-                 : "none";
- 
-             // LEFT
-             td.style.borderLeft = ver[y][x]
-                 ? "2px solid black"
-                 : "none";
- 
-             // RIGHT
-             td.style.borderRight = ver[y][x + 1]
-                 ? "2px solid black"
-                 : "none";
- 
-             // Entrance / Exit
-             if (x === 0 && y === 0) td.style.background = "lightgreen";
-             if (x === w - 1 && y === h - 1) td.style.background = "lightcoral";
- 
-             tr.appendChild(td);
-         }
-         table.appendChild(tr);
-     }
- }
+        
+        // Function to find and draw solution path
+        function findAndDrawSolution(mazeData) {
+            const { hor, ver, w, h } = mazeData;
+            
+            // BFS to find solution path from start (0,0) to end (w-1, h-1)
+            const queue = [{x: 0, y: 0, path: [{x: 0, y: 0}]}];
+            const visited = Array(h).fill().map(() => Array(w).fill(false));
+            visited[0][0] = true;
+            
+            while (queue.length > 0) {
+                const {x, y, path} = queue.shift();
+                
+                if (x === w - 1 && y === h - 1) {
+                    // Found solution path
+                    drawSolutionPath(path);
+                    return;
+                }
+                
+                // Check all 4 directions
+                // Up: check if there's no top wall for current cell
+                if (y > 0 && !hor[y][x] && !visited[y-1][x]) {
+                    visited[y-1][x] = true;
+                    queue.push({x: x, y: y-1, path: [...path, {x: x, y: y-1}] });
+                }
+                
+                // Down: check if there's no bottom wall for current cell
+                if (y < h-1 && !hor[y+1][x] && !visited[y+1][x]) {
+                    visited[y+1][x] = true;
+                    queue.push({x: x, y: y+1, path: [...path, {x: x, y: y+1}] });
+                }
+                
+                // Left: check if there's no left wall for current cell
+                if (x > 0 && !ver[y][x] && !visited[y][x-1]) {
+                    visited[y][x-1] = true;
+                    queue.push({x: x-1, y: y, path: [...path, {x: x-1, y: y}] });
+                }
+                
+                // Right: check if there's no right wall for current cell
+                if (x < w-1 && !ver[y][x+1] && !visited[y][x+1]) {
+                    visited[y][x+1] = true;
+                    queue.push({x: x+1, y: y, path: [...path, {x: x+1, y: y}] });
+                }
+            }
+            
+            console.log("No solution found");
+        }
+        
+        // Function to draw the solution path
+        function drawSolutionPath(path) {
+            // Reset all cell backgrounds first
+            const table = document.getElementById("maze-table");
+            const rows = table.querySelectorAll("tr");
+            
+            for (let y = 0; y < rows.length; y++) {
+                const cells = rows[y].querySelectorAll("td");
+                for (let x = 0; x < cells.length; x++) {
+                    // Reset to default (might have been highlighted before)
+                    if (!(x === 0 && y === 0) && !(x === currentMazeData.w - 1 && y === currentMazeData.h - 1)) {
+                        if (cells[x].style.background !== "lightgreen" && cells[x].style.background !== "lightcoral") {
+                            cells[x].style.background = "";
+                        }
+                    }
+                }
+            }
+            
+            // Highlight the solution path in red
+            for (const pos of path) {
+                const cell = document.getElementById(`cell-${pos.y}-${pos.x}`);  // Use ID to get cell
+                if (cell) {
+                    // Don't override entrance/exit colors
+                    if (!(pos.x === 0 && pos.y === 0) && !(pos.x === currentMazeData.w - 1 && pos.y === currentMazeData.h - 1)) {
+                        cell.classList.add("solution");  // Add CSS class for solution path
+                    }
+                }
+            }
+        }
+    </script>
     </script>
 </body>
 </html>

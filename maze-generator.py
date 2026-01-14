@@ -1,7 +1,9 @@
 from random import shuffle
 from flask import Flask, request, jsonify, render_template
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
 def make_maze(w=16, h=8):
     # Initialize visited array - 0 means unvisited, 1 means visited
@@ -46,11 +48,15 @@ def make_maze(w=16, h=8):
 def index():
     return render_template('index.html')
 
+# Input validation helper functions
+def clamp(value, min_val, max_val):
+    return max(min_val, min(value, max_val))
+
 @app.route('/generate', methods=['POST'])
 def generate():
     data = request.get_json()
-    w = int(data.get('width', 16))
-    h = int(data.get('height', 8))
+    w = clamp(int(data.get('width', 16)), 2, 50)
+    h = clamp(int(data.get('height', 8)), 2, 50)
     maze_data = make_maze(w, h)
     return jsonify(maze_data)
 
