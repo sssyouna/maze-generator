@@ -24,6 +24,7 @@
         #maze-table {
             margin-top: 10px;
             border-collapse: collapse;
+            border: 2px solid black;
         }
     </style>
 </head>
@@ -86,17 +87,50 @@
                     cell.style.height = "20px";
                     cell.style.padding = "0";
                     cell.style.margin = "0";
-                    cell.style.border = "1px solid #eee"; // Light border to separate cells
                     
-                    // Show/hide based on the value in the 2D array
+                    // Set border based on the value in the 2D array
                     if (mazeArray[i][j] === 1) {
-                        // Wall - make it visible
-                        cell.style.backgroundColor = "black";
-                        cell.style.visibility = "visible";
+                        // Wall - keep all borders to form solid walls
+                        cell.style.borderTop = "2px solid black";
+                        cell.style.borderRight = "2px solid black";
+                        cell.style.borderBottom = "2px solid black";
+                        cell.style.borderLeft = "2px solid black";
+                        cell.style.backgroundColor = "transparent"; // Transparent to show the path between borders
                     } else {
-                        // Path - make it white
-                        cell.style.backgroundColor = "white";
-                        cell.style.visibility = "visible"; // Still visible but with different color
+                        // Pathway - selectively remove borders to create connected paths
+                        // Initially set all borders
+                        cell.style.borderTop = "2px solid black";
+                        cell.style.borderRight = "2px solid black";
+                        cell.style.borderBottom = "2px solid black";
+                        cell.style.borderLeft = "2px solid black";
+                        cell.style.backgroundColor = "transparent"; // Transparent to show the path between borders
+                        
+                        // For path cells, we need to determine which borders to remove based on neighbors
+                        // Check if neighboring cells are also paths (0) and remove shared borders
+                        
+                        // Check top neighbor
+                        if (i > 0 && mazeArray[i-1][j] === 0) {
+                            // Remove top border if top neighbor is also a path
+                            cell.style.borderTop = "none";
+                        }
+                        
+                        // Check bottom neighbor
+                        if (i < numRows - 1 && mazeArray[i+1][j] === 0) {
+                            // Remove bottom border if bottom neighbor is also a path
+                            cell.style.borderBottom = "none";
+                        }
+                        
+                        // Check left neighbor
+                        if (j > 0 && mazeArray[i][j-1] === 0) {
+                            // Remove left border if left neighbor is also a path
+                            cell.style.borderLeft = "none";
+                        }
+                        
+                        // Check right neighbor
+                        if (j < numCols - 1 && mazeArray[i][j+1] === 0) {
+                            // Remove right border if right neighbor is also a path
+                            cell.style.borderRight = "none";
+                        }
                     }
                     
                     row.appendChild(cell);
