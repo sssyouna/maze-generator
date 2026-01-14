@@ -4,40 +4,43 @@ from flask import Flask, request, jsonify, render_template
 app = Flask(__name__)
 
 def make_maze(w=16, h=8):
-    vis = [[0]*w + [1] for _ in range(h)] + [[1]*(w+1)]
-    ver = [[1]*w for _ in range(h)]
-    hor = [[1]*w for _ in range(h+1)]
+    # Initialize visited array - 0 means unvisited, 1 means visited
+    vis = [[0] * w for _ in range(h)]
+    
+    # Initialize walls - 1 means wall exists, 0 means path is open
+    ver = [[1]*w for _ in range(h)]  # vertical walls between cells in same row
+    hor = [[1]*w for _ in range(h+1)]  # horizontal walls between rows
 
     def walk(x, y):
         vis[y][x] = 1
+        # Directions: left, down, right, up
         d = [(x-1,y),(x,y+1),(x+1,y),(x,y-1)]
         shuffle(d)
         for xx, yy in d:
-            if vis[yy][xx]:
+            if xx < 0 or xx >= w or yy < 0 or yy >= h or vis[yy][xx]:
                 continue
-            if xx == x:
-                hor[max(y,yy)][x] = 0  # open horizontal
-            if yy == y:
-                ver[y][max(x,xx)] = 0  # open vertical
+            if xx == x:  # moving vertically
+                hor[max(y,yy)][x] = 0  # remove horizontal wall between cells
+            if yy == y:  # moving horizontally
+                ver[y][max(x,xx)] = 0  # remove vertical wall between cells
             walk(xx, yy)
 
+    # Start DFS from top-left corner (0, 0)
     walk(0, 0)
 
-    # Entrance & exit
-    hor[0][0] = 0  # entrance
-    hor[h][w-1] = 0  # exit
+    # Ensure entrance at top-left (remove leftmost top wall)
+    hor[0][0] = 0  # entrance at top-left
+    
+    # Ensure exit at bottom-right (remove rightmost bottom wall)
+    hor[h][w-1] = 0  # exit at bottom-right
 
     # Build 2D array representation
+    # Interleave horizontal and vertical walls as before
     maze_array = []
-    for i in range(len(hor)):
-        if i < len(ver):
-            # Add horizontal row
-            maze_array.append(hor[i][:])
-            # Add vertical row
+    for i in range(h + 1):  # h+1 horizontal wall rows
+        maze_array.append(hor[i][:])
+        if i < h:  # h vertical wall rows
             maze_array.append(ver[i][:])
-        else:
-            # Add the last horizontal row
-            maze_array.append(hor[i][:])
     
     return maze_array
 

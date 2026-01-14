@@ -133,6 +133,23 @@
                         }
                     }
                     
+                    // Mark entrance and exit specially
+                    // Entrance is at top-left: hor[0][0] maps to even row 0, column 0
+                    // Exit is at bottom-right: hor[h][w-1] maps to even row 2*h, column w-1
+                    const h = (numRows - 1) / 2; // Calculate original maze height
+                    const w = numCols; // Original maze width
+                    
+                    // Entrance: first row (horizontal walls), first column
+                    if (i === 0 && j === 0) {
+                        cell.style.backgroundColor = "lightgreen"; // Green for entrance
+                        cell.title = "Entrance";
+                    }
+                    // Exit: last horizontal row, last column
+                    else if (i === numRows - 1 && j === w - 1 && i % 2 === 0) {
+                        cell.style.backgroundColor = "lightcoral"; // Red for exit
+                        cell.title = "Exit";
+                    }
+                    
                     row.appendChild(cell);
                 }
                 
