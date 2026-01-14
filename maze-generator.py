@@ -34,15 +34,13 @@ def make_maze(w=16, h=8):
     # Ensure exit at bottom-right (remove rightmost bottom wall)
     hor[h][w-1] = 0  # exit at bottom-right
 
-    # Build 2D array representation
-    # Interleave horizontal and vertical walls as before
-    maze_array = []
-    for i in range(h + 1):  # h+1 horizontal wall rows
-        maze_array.append(hor[i][:])
-        if i < h:  # h vertical wall rows
-            maze_array.append(ver[i][:])
-    
-    return maze_array
+    # Return the walls separately with dimensions
+    return {
+        "hor": hor,
+        "ver": ver,
+        "w": w,
+        "h": h
+    }
 
 @app.route('/')
 def index():

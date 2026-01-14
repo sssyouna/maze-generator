@@ -58,104 +58,42 @@
                     })
                 })
                 .then(res => res.json())
-                .then(data => drawMaze(data.maze))
+                .then(responseData => drawMaze(responseData.maze))
                 .catch(err => console.error(err));
             });
         });
+function drawMaze(data) {
+    const { hor, ver, w, h } = data;
+    const table = document.getElementById("maze-table");
+    table.innerHTML = "";
 
-        function drawMaze(mazeArray) {
-            const table = document.getElementById("maze-table");
-            table.innerHTML = ""; // Clear previous maze
-            
-            if (!mazeArray || mazeArray.length === 0) return;
-            
-            const numRows = mazeArray.length;
-            const numCols = mazeArray[0] ? mazeArray[0].length : 0;
-            
-            // Create table rows and cells
-            for (let i = 0; i < numRows; i++) {
-                const row = document.createElement("tr");
-                
-                for (let j = 0; j < numCols; j++) {
-                    const cell = document.createElement("td");
-                    
-                    // Set unique ID for each cell
-                    cell.id = `cell-${i}-${j}`;
-                    
-                    // Set default styles
-                    cell.style.width = "20px";
-                    cell.style.height = "20px";
-                    cell.style.padding = "0";
-                    cell.style.margin = "0";
-                    
-                    // Set border based on the value in the 2D array
-                    if (mazeArray[i][j] === 1) {
-                        // Wall - keep all borders to form solid walls
-                        cell.style.borderTop = "2px solid black";
-                        cell.style.borderRight = "2px solid black";
-                        cell.style.borderBottom = "2px solid black";
-                        cell.style.borderLeft = "2px solid black";
-                        cell.style.backgroundColor = "transparent"; // Transparent to show the path between borders
-                    } else {
-                        // Pathway - selectively remove borders to create connected paths
-                        // Initially set all borders
-                        cell.style.borderTop = "2px solid black";
-                        cell.style.borderRight = "2px solid black";
-                        cell.style.borderBottom = "2px solid black";
-                        cell.style.borderLeft = "2px solid black";
-                        cell.style.backgroundColor = "transparent"; // Transparent to show the path between borders
-                        
-                        // For path cells, we need to determine which borders to remove based on neighbors
-                        // Check if neighboring cells are also paths (0) and remove shared borders
-                        
-                        // Check top neighbor
-                        if (i > 0 && mazeArray[i-1][j] === 0) {
-                            // Remove top border if top neighbor is also a path
-                            cell.style.borderTop = "none";
-                        }
-                        
-                        // Check bottom neighbor
-                        if (i < numRows - 1 && mazeArray[i+1][j] === 0) {
-                            // Remove bottom border if bottom neighbor is also a path
-                            cell.style.borderBottom = "none";
-                        }
-                        
-                        // Check left neighbor
-                        if (j > 0 && mazeArray[i][j-1] === 0) {
-                            // Remove left border if left neighbor is also a path
-                            cell.style.borderLeft = "none";
-                        }
-                        
-                        // Check right neighbor
-                        if (j < numCols - 1 && mazeArray[i][j+1] === 0) {
-                            // Remove right border if right neighbor is also a path
-                            cell.style.borderRight = "none";
-                        }
-                    }
-                    
-                    // Mark entrance and exit specially
-                    // Entrance is at top-left: hor[0][0] maps to row 0, column 0
-                    // Exit is at bottom-right: hor[h][w-1] maps to row 2*h, column w-1
-                    const originalHeight = (numRows - 1) / 2; // Calculate original maze height
-                    const originalWidth = numCols; // Original maze width
-                    
-                    // Entrance: first row (horizontal walls), first column
-                    if (i === 0 && j === 0) {
-                        cell.style.backgroundColor = "lightgreen"; // Green for entrance
-                        cell.title = "Entrance";
-                    }
-                    // Exit: last horizontal row, last column
-                    else if (i === numRows - 1 && j === w - 1 && i % 2 === 0) {
-                        cell.style.backgroundColor = "lightcoral"; // Red for exit
-                        cell.title = "Exit";
-                    }
-                    
-                    row.appendChild(cell);
-                }
-                
-                table.appendChild(row);
-            }
+    for (let y = 0; y < h; y++) {
+        const tr = document.createElement("tr");
+
+        for (let x = 0; x < w; x++) {
+            const td = document.createElement("td");
+            td.style.width = "25px";
+            td.style.height = "25px";
+            td.style.boxSizing = "border-box";
+
+            // walls
+            td.style.borderTop = hor[y][x] ? "2px solid black" : "none";
+            td.style.borderBottom = hor[y + 1][x] ? "2px solid black" : "none";
+            td.style.borderLeft = x === 0 || ver[y][x - 1] ? "2px solid black" : "none";
+            td.style.borderRight = ver[y][x] ? "2px solid black" : "none";
+
+            // entrance
+            if (x === 0 && y === 0) td.style.background = "lightgreen";
+            // exit
+            if (x === w - 1 && y === h - 1) td.style.background = "lightcoral";
+
+            tr.appendChild(td);
         }
+        table.appendChild(tr);
+    }
+}
+
+       
     </script>
 </body>
 </html>
