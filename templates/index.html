@@ -45,8 +45,9 @@
     <table id="maze-table" style="border-collapse: collapse; border: 2px solid black;"></table>
 
     <script>
-        // Global variable for storing maze data
+        // Global variables for storing maze data and player position
         let currentMazeData = null;
+        let currentPlayerPos = null;
         
         // Add event listeners once at the top level
         document.getElementById("generatebtn").addEventListener("click", function() {
@@ -81,29 +82,41 @@
         });
         
         document.getElementById("startbtn").addEventListener("click", function() {
-            // Reset the maze display when starting to play
-            const width = Math.max(2, Math.min(50, parseInt(document.getElementById("w").value)));
-            const height = Math.max(2, Math.min(50, parseInt(document.getElementById("h").value)));
-            
-            if (!width || !height) {
-                alert("Please enter both width and height");
-                return;
-            }
-            
-            fetch("/generate", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    width: width,
-                    height: height
+            // Reset the game state but keep the same maze structure
+            if (currentMazeData) {
+                // Reset player position to end (green) and remove solution path
+                drawMaze(currentMazeData);
+                // Set initial player position to end point
+                currentPlayerPos = {x: currentMazeData.w - 1, y: currentMazeData.h - 1};
+                // Update player position visualization
+                updatePlayerPosition();
+            } else {
+                // If no maze exists, generate a default one
+                const width = Math.max(2, Math.min(50, parseInt(document.getElementById("w").value)));
+                const height = Math.max(2, Math.min(50, parseInt(document.getElementById("h").value)));
+                        
+                if (!width || !height) {
+                    alert("Please enter both width and height");
+                    return;
+                }
+                        
+                fetch("/generate", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        width: width,
+                        height: height
+                    })
                 })
-            })
-            .then(res => res.json())
-            .then(data => {
-                currentMazeData = data; // Store for solution
-                drawMaze(data);
-            })
-            .catch(err => console.error(err));
+                .then(res => res.json())
+                .then(data => {
+                    currentMazeData = data; // Store for solution
+                    currentPlayerPos = {x: data.w - 1, y: data.h - 1};
+                    drawMaze(data);
+                    updatePlayerPosition();
+                })
+                .catch(err => console.error(err));
+            }
         });
         
         // Single drawMaze function that only draws the maze
@@ -142,9 +155,9 @@
                         ? "2px solid black"
                         : "none";
         
-                    // Entrance / Exit (consistent colors: start=green, end=red)
-                    if (x === 0 && y === 0) td.style.background = "lightgreen";  // Start point (green)
-                    if (x === w - 1 && y === h - 1) td.style.background = "lightcoral";  // End point (red)
+                    // Entrance / Exit (corrected colors: start=red, end=green)
+                    if (x === 0 && y === 0) td.style.background = "lightcoral";  // Start point (red)
+                    if (x === w - 1 && y === h - 1) td.style.background = "lightgreen";  // End point (green)
         
                     tr.appendChild(td);
                 }
@@ -228,7 +241,85 @@
                 }
             }
         }
-    </script>
+        
+        // Function to update player position visualization
+        function updatePlayerPosition() {
+            if (!currentMazeData || !currentPlayerPos) return;
+            
+            const { w, h } = currentMazeData;
+            const { x, y } = currentPlayerPos;
+            
+            // Validate position is within bounds
+            if (x < 0 || x >= w || y < 0 || y >= h) return;
+            
+            // Get the cell element
+            const cell = document.getElementById(`cell-${y}-${x}`);
+            if (cell) {
+                // Add player indicator (different from start/end)
+                cell.style.background = "radial-gradient(circle, yellow, gold)";
+            }
+            
+            // Make sure start and end points retain their colors if they are not the current player position
+            if (!(x === 0 && y === 0)) {
+                const startCell = document.getElementById(`cell-0-0`);
+                if (startCell) startCell.style.background = "lightcoral";
+            }
+            if (!(x === w - 1 && y === h - 1)) {
+                const endCell = document.getElementById(`cell-${h-1}-${w-1}`);
+                if (endCell) endCell.style.background = "lightgreen";
+            }
+        }
+        
+        // Keyboard controls for player movement
+        document.addEventListener('keydown', function(e) {
+            if (!currentMazeData || !currentPlayerPos) return;
+            
+            const { hor, ver, w, h } = currentMazeData;
+            let { x, y } = currentPlayerPos;
+            let moved = false;
+            
+            switch(e.key) {
+                case 'ArrowUp':
+                    if (y > 0 && !hor[y][x]) { // Check if no top wall
+                        y--;
+                        moved = true;
+                    }
+                    break;
+                case 'ArrowDown':
+                    if (y < h - 1 && !hor[y + 1][x]) { // Check if no bottom wall
+                        y++;
+                        moved = true;
+                    }
+                    break;
+                case 'ArrowLeft':
+                    if (x > 0 && !ver[y][x]) { // Check if no left wall
+                        x--;
+                        moved = true;
+                    }
+                    break;
+                case 'ArrowRight':
+                    if (x < w - 1 && !ver[y][x + 1]) { // Check if no right wall
+                        x++;
+                        moved = true;
+                    }
+                    break;
+            }
+            
+            if (moved) {
+                // Update player position
+                currentPlayerPos = { x, y };
+                
+                // Update visualization
+                updatePlayerPosition();
+                
+                // Check if player reached start point (win condition)
+                if (x === 0 && y === 0) {
+                    setTimeout(() => {
+                        alert('Congratulations! You reached the start point!');
+                    }, 100);
+                }
+            }
+        });
     </script>
 </body>
 </html>
